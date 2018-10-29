@@ -1,8 +1,7 @@
 package tictactoe;
 
-import engine.ThreadHandler;
-import engine.Time;
 import engine.connection.ConnectionSystem;
+import engine.connection.Packet;
 import engine.filesystem.FileSystem;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -96,6 +95,12 @@ public class Player {
     }
     
     private void handleInputAsOnlinePlayer(){
+        ConnectionSystem connectionSystem = TicTacToe.init.getConnectionSystem();
+        Packet packet = connectionSystem.receivePacket();
+        
+        if(packet.getCommand_short().equals("update")){
+            field = (FieldState[][])packet.getData().get(0);
+        }
         
     }
     
@@ -109,7 +114,10 @@ public class Player {
     }
     
     private void handleOutputAsOnlinePlayer(){
-        
+        ConnectionSystem connectionSystem = TicTacToe.init.getConnectionSystem();
+        Packet packet = new Packet("update");
+        packet.addData(field);
+        connectionSystem.sendPacket(packet);
     }
     
     private int countUsedFields(){
@@ -129,9 +137,9 @@ public class Player {
         TicTacToe.init.initializeConnectionSystem();
         ConnectionSystem connectionSystem = TicTacToe.init.getConnectionSystem();
         
-        connectionSystem.initializeClient(ipaddress, port, 5000);
+        connectionSystem.initializeClient(ipaddress, port);
         connectionSystem.connect(5);
-        
+        System.out.println("connected!");
         
     }
     

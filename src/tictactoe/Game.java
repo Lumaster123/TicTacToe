@@ -2,6 +2,7 @@ package tictactoe;
 
 import engine.ThreadHandler;
 import engine.Time;
+import engine.connection.Packet;
 import engine.window.Window;
 import engine.window.WindowPanel;
 import java.awt.Dimension;
@@ -60,9 +61,24 @@ public class Game implements MouseListener, Runnable{
         // disable mouseInput
         reciveMouseInput = 0;
         
-        // generate random boolean for wich player starts
-        Random rd = new Random();
-        boolean playerTurn = rd.nextBoolean();
+        boolean playerTurn;
+        if(player1.PLAYER_HANDLE == Player.Player_Handle.PLAYER_HANDLED_BY_ONLINE_PLAYER || player2.PLAYER_HANDLE == Player.Player_Handle.PLAYER_HANDLED_BY_ONLINE_PLAYER){
+            Packet packet = TicTacToe.init.getConnectionSystem().receivePacket();
+            if(packet.getCommand_short().equals("player")){
+                if(Integer.parseInt(packet.getCommand()[1]) == 1)
+                    playerTurn = true;
+                else
+                    playerTurn = false;
+            }else{
+                System.out.println("received a packet which contains no valid command!");
+                playerTurn = false;
+            }
+        }else{
+            // generate random boolean for wich player starts
+            Random rd = new Random();
+            playerTurn = rd.nextBoolean();
+        }
+        
         // player who is on turn
         Player playerOnTurn;
         // say wich player starts
