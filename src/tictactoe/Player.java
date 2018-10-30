@@ -99,7 +99,20 @@ public class Player {
         Packet packet = connectionSystem.receivePacket();
         
         if(packet.getCommand_short().equals("update")){
-            field = (FieldState[][])packet.getData().get(0);
+            int[][] fData = (int[][])packet.getData().get(0);
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++){
+                    System.out.println(fData[i][j]);
+                    if(fData[i][j] == 0){
+                        field[i][j] = FieldState.NOT_USED;
+                    }else if(fData[i][j] == 2){
+                        field[i][j] = FieldState.USED_PLAYER1;
+                    }else if(fData[i][j] == 1){
+                        field[i][j] = FieldState.USED_PLAYER2;
+                    }
+
+                }
+            }
         }
         
     }
@@ -116,8 +129,21 @@ public class Player {
     private void handleOutputAsOnlinePlayer(){
         ConnectionSystem connectionSystem = TicTacToe.init.getConnectionSystem();
         Packet packet = new Packet("update");
-        packet.addData(field);
+        int[][] fData = new int[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++){
+                if(field[i][j] == FieldState.NOT_USED){
+                    fData[i][j] = 0;
+                }else if(field[i][j] == FieldState.USED_PLAYER1){
+                    fData[i][j] = 1;
+                }else if(field[i][j] == FieldState.USED_PLAYER2){
+                    fData[i][j] = 2;
+                }
+            }
+        }
+        packet.addData((Object)fData);
         connectionSystem.sendPacket(packet);
+        System.out.println("added to sent list");
     }
     
     private int countUsedFields(){
